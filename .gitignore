@@ -1,0 +1,8 @@
+/audio
+/datasets
+/frames
+
+*.mp4
+*.wav
+
+main.py

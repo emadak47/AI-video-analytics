@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+tensorflow = "==2.10.1"
+opencv-python = "*"
+matplotlib = "*"
+scipy = "*"
+librosa = "*"
+pandas = "*"
+wave = "*"
+pyaudio = "*"
+plotly = "*"
+dlib = "*"
+mutagen = "*"
+pydub = "*"
+flask = "*"
+
+[dev-packages]
+ipykernel = "*"
+
+[requires]
+python_version = "3.9"

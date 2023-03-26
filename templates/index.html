@@ -1,0 +1,99 @@
+<!DOCTYPE html5>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Video Page</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename = 'style.css') }}">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>
+</head>
+
+<body>
+	<div class="container">
+		<div class="video-container">
+			VIDEOE PLACEHOLDER
+		</div>
+		<div class="sidebar">
+			<canvas class="pie-chart" id="chart1">FER</canvas>
+			<canvas class="pie-chart" id="chart2">EYE EMOTION</canvas>
+			<canvas class="pie-chart" id="chart3">EYE GAZE</canvas>
+		</div>
+	</div>
+
+	<script type="module">
+		Chart.defaults.global.responsive = false;
+		var backgroundColor = [
+			'#FAEBD7',
+			'#7FFFD4',
+			'#A52A2A',
+			'#8A2BE2',
+			'#0000FF',
+			'#5F9EA0',
+			'#D2691E',
+			'#DC143C',
+			'#E9967A',
+			'#696969',
+			'#00FFFF',
+			'#F0F8FF',
+		];
+
+		function drawPieChart(itemId, endpoint) {
+			fetch(`http://127.0.0.1:5000/${endpoint}`, { method: 'GET', })
+				.then(response => response.json())
+				.then(result => {
+					var charData = {
+						labels: [],
+						datasets: [{ data: [], backgroundColor: [] }]
+					};
+					let counter = 0;
+					
+					for (const prop in result.data) {
+						charData.labels.push(prop);
+						charData.datasets[0].data.push(result.data[prop]);
+						charData.datasets[0].backgroundColor.push(backgroundColor[counter]);
+						counter += 1;
+					}
+
+					console.log(charData);
+
+					var ctx = document.getElementById(itemId).getContext("2d");
+					var options = {
+						tooltips: { enabled: false },
+						plugins: {
+							labels: [
+								{
+									render: 'label',
+									position: 'outside',
+									fontColor: '#000',
+									fontSize: 10
+								},
+								{
+									render: 'percentage',
+									fontColor: '#000',
+									fontSize: 10,
+									position: 'border',
+								}
+							]
+						},
+						legend: {
+							display: false
+						}
+					};
+
+					var myChart = new Chart(ctx, {
+						type: 'pie',
+						data: charData,
+						options: options
+					});
+				})
+				.catch(err => console.error(err));
+		}
+
+		drawPieChart("chart1", "FER");
+		drawPieChart("chart2", "EYE_EMOTION");
+		drawPieChart("chart3", "EYE_GAZE");
+	</script>
+</body>
+
+</html>
