@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Video Page</title>
-	<link rel="stylesheet" href="{{ url_for('static', filename = 'style.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css') }}">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>
 </head>
@@ -12,16 +12,23 @@
 <body>
 	<div class="container">
 		<div class="video-container">
-			VIDEOE PLACEHOLDER
+			<div class="grid-container"></div>
+			<button id="upload-btn" onclick="uploadVideo()"></button>
+			<button id="live-btn" onclick="liveVideo()"></button>
+			<button id="terminate-btn" onclick="terminate()"></button>
 		</div>
 		<div class="sidebar">
-			<canvas class="pie-chart" id="chart1">FER</canvas>
-			<canvas class="pie-chart" id="chart2">EYE EMOTION</canvas>
-			<canvas class="pie-chart" id="chart3">EYE GAZE</canvas>
+			<canvas class="pie-chart" id="FACIAL-EXPRESSION"></canvas>
+			<canvas class="pie-chart" id="EYE-EMOTION"></canvas>
+		</div>
+		<div class="btmbar">
+			<canvas class="pie-chart" id="EYE-GAZE"></canvas>
+			<canvas class="pie-chart" id="AUDIO"></canvas>
+			<canvas class="pie-chart" id="METRICS"></canvas>
 		</div>
 	</div>
 
-	<script type="module">
+	<script>
 		Chart.defaults.global.responsive = false;
 		var backgroundColor = [
 			'#FAEBD7',
@@ -38,61 +45,214 @@
 			'#F0F8FF',
 		];
 
-		function drawPieChart(itemId, endpoint) {
-			fetch(`http://127.0.0.1:5000/${endpoint}`, { method: 'GET', })
+		async function getData(endpoint) {
+			return await fetch(`http://127.0.0.1:5000/${endpoint}`, { method: 'GET' })
 				.then(response => response.json())
-				.then(result => {
-					var charData = {
-						labels: [],
-						datasets: [{ data: [], backgroundColor: [] }]
-					};
-					let counter = 0;
-					
-					for (const prop in result.data) {
-						charData.labels.push(prop);
-						charData.datasets[0].data.push(result.data[prop]);
-						charData.datasets[0].backgroundColor.push(backgroundColor[counter]);
-						counter += 1;
-					}
-
-					console.log(charData);
-
-					var ctx = document.getElementById(itemId).getContext("2d");
-					var options = {
-						tooltips: { enabled: false },
-						plugins: {
-							labels: [
-								{
-									render: 'label',
-									position: 'outside',
-									fontColor: '#000',
-									fontSize: 10
-								},
-								{
-									render: 'percentage',
-									fontColor: '#000',
-									fontSize: 10,
-									position: 'border',
-								}
-							]
-						},
-						legend: {
-							display: false
-						}
-					};
-
-					var myChart = new Chart(ctx, {
-						type: 'pie',
-						data: charData,
-						options: options
-					});
-				})
+				.then(result => result.data)
 				.catch(err => console.error(err));
 		}
 
-		drawPieChart("chart1", "FER");
-		drawPieChart("chart2", "EYE_EMOTION");
-		drawPieChart("chart3", "EYE_GAZE");
+		function drawPieChart(itemId, result) {
+			var charData = {
+				labels: [],
+				datasets: [{ data: [], backgroundColor: [], borderWidth: 1 }]
+			};
+			let counter = 0;
+
+			for (const prop in result) {
+				if (prop == "count" || prop == "c_o_u_n_t") { continue; }
+
+				charData.labels.push(prop);
+				charData.datasets[0].data.push(result[prop]);
+				charData.datasets[0].backgroundColor.push(backgroundColor[counter]);
+				counter += 1;
+			}
+
+			var ctx = document.getElementById(itemId).getContext("2d");
+			var options = {
+				tooltips: { enabled: false },
+				plugins: {
+					labels: [
+						{
+							render: 'label',
+							position: 'outside',
+							fontColor: '#000',
+							fontSize: 10
+						},
+						{
+							render: 'percentage',
+							fontColor: '#000',
+							fontSize: 10,
+							position: 'border',
+						}
+					],
+				},
+				legend: { display: false },
+				title: {
+					display: true,
+					text: itemId,
+					fontSize: 20,
+					fontColor: '#000',
+					padding: 10,
+					align: 'center',
+				}
+			};
+
+			var myChart = new Chart(ctx, {
+				type: 'pie',
+				data: charData,
+				options: options
+			});
+		}
+
+		function drawBarChart(itemId, scores) {
+			var charData = {
+				labels: [],
+				datasets: [{
+					label: "Scores",
+					data: [],
+					backgroundColor: [],
+					borderColor: [],
+					borderWidth: 1,
+				}]
+			};
+			let counter = 0;
+
+			for (const prop in scores) {
+				charData.labels.push(prop);
+				charData.datasets[0].data.push(scores[prop]);
+				charData.datasets[0].backgroundColor.push(backgroundColor[counter]);
+				charData.datasets[0].borderColor.push(backgroundColor[counter]);
+
+				counter += 1;
+			}
+
+			var ctx = document.getElementById(itemId).getContext("2d");
+			var options = {
+				plugins: {
+					labels: {
+						render: () => { }
+					},
+				},
+				scales: {
+					yAxes: [
+						{
+							ticks: {
+								beginAtZero: true,
+							}
+						}
+					],
+				},
+				tooltips: { enabled: false },
+				legend: { display: false },
+				title: {
+					display: true,
+					text: itemId,
+					fontSize: 20,
+					fontColor: '#000',
+					padding: 10,
+					align: 'center',
+				}
+			}
+
+			var myChart = new Chart(ctx, {
+				type: 'bar',
+				data: charData,
+				options: options
+			});
+		}
+
+		async function uploadVideo() {
+			const input = document.createElement('input');
+			input.type = 'file';
+
+			input.onchange = (event) => {
+				const file = event.target.files[0];
+				const formData = new FormData();
+				formData.append('file', file);
+
+				fetch('/uploads', {
+					method: 'POST',
+					body: formData,
+				})
+					.then(response => {
+						console.log('Success:', response);
+					})
+					.catch(error => {
+						console.error('Error uploading file:', error);
+					});
+			};
+
+			input.click();
+
+			let result = await getData("st-data");
+
+			drawPieChart("FACIAL-EXPRESSION", result.FER);
+			drawPieChart("EYE-EMOTION", result.EYE_EMOTION);
+			drawPieChart("EYE-GAZE", result.EYE_GAZE);
+			drawPieChart("AUDIO", result.AUDIO);
+			drawBarChart("METRICS", result.Scores);
+		}
+
+		async function liveVideo() {
+			var videoStream = document.createElement("img");
+			videoStream.setAttribute("width", "90%");
+			videoStream.src = "{{ url_for('video_feed') }}";
+			document.getElementsByClassName("video-container")[0].appendChild(videoStream);
+
+			let result = await getData("rt-data");
+
+			console.log(result);
+			
+			drawPieChart("FACIAL-EXPRESSION", result.FER);
+			drawPieChart("EYE-EMOTION", result.EYE_EMOTION);
+			drawPieChart("EYE-GAZE", result.EYE_GAZE);
+			drawPieChart("AUDIO", result.AUDIO);
+			drawBarChart("METRICS", result.Scores);
+		}
+
+		async function terminate() {
+			try {
+				const response = await fetch('/terminate', { method: 'POST' });
+				const result = await response.json();
+				console.log(result);
+			} catch (error) {
+				console.error(error);
+			}
+		}
+
+		const gridContainer = document.getElementsByClassName('grid-container')[0];
+		const uploadButton = document.getElementById('upload-btn');
+		uploadButton.addEventListener('click', async () => {
+			const numCells = 15;
+
+			var mp = {
+				1: `{{ url_for("static", filename="images/frame_2.jpg") }}`,
+				2: `{{ url_for("static", filename="images/frame_3.jpg") }}`,
+				3: `{{ url_for("static", filename="images/frame_4.jpg") }}`,
+				4: `{{ url_for("static", filename="images/frame_5.jpg") }}`,
+				5: `{{ url_for("static", filename="images/frame_6.jpg") }}`,
+				6: `{{ url_for("static", filename="images/frame_7.jpg") }}`,
+				7: `{{ url_for("static", filename="images/frame_8.jpg") }}`,
+				8: `{{ url_for("static", filename="images/frame_9.jpg") }}`,
+				9: `{{ url_for("static", filename="images/frame_10.jpg") }}`,
+				10: `{{ url_for("static", filename="images/frame_11.jpg") }}`,
+				11: `{{ url_for("static", filename="images/frame_12.jpg") }}`,
+				12: `{{ url_for("static", filename="images/frame_13.jpg") }}`,
+				13: `{{ url_for("static", filename="images/frame_14.jpg") }}`,
+				14: `{{ url_for("static", filename="images/frame_15.jpg") }}`,
+				15: `{{ url_for("static", filename="images/frame_16.jpg") }}`,
+			}
+
+			gridContainer.innerHTML = '';
+
+			for (let i = 0; i < numCells; i++) {
+				const cell = document.createElement('div');
+				cell.style.backgroundImage = `url(${mp[i]})`;
+				cell.style.backgroundSize = 'cover';
+				gridContainer.appendChild(cell);
+			}
+		});
 	</script>
 </body>
 
