@@ -1,0 +1,103 @@
+* {
+	box-sizing: border-box;
+}
+
+body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.container {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	height: 100%;
+	padding: 10px;
+}
+
+.video-container {
+	width: 65%;
+	height: 64%;
+	background-color: #eee;
+	border: 1px solid #ccc;
+	padding: 10px;
+	position: relative;
+}
+
+.grid-container {
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	grid-template-rows: repeat(3, 1fr);
+	gap: 10px;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+
+.sidebar {
+	background-color: #fff;
+	padding: 10px;
+	display: flex;
+	flex-direction: column;
+}
+
+.btmbar {
+	background-color: #fff;
+	display: flex;
+	flex-direction: row;
+}
+
+.pie-chart {
+	margin-bottom: 10px;
+	height: 460px;
+	width: 460px;
+	background-color: #f0f0f0;
+}
+
+button {
+	background-color: #4CAF50;
+	border: none;
+	color: white;
+	padding: 5px 10px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 16px;
+	margin: 6px 6px;
+	cursor: pointer;
+	border-radius: 5px;
+	position: absolute;
+}
+
+#upload-btn:before {
+	content: "\21AA";
+}
+
+#live-btn:before {
+	content: "\25B6";
+}
+
+#terminate-btn:before {
+	content: "\2716";
+}
+
+#upload-btn {
+	background-color: #008CBA;
+	top: 0;
+	right: 90;
+}
+
+#live-btn {
+	background-color: #f44336;
+	top: 0;
+	right: 45;
+}
+
+#terminate-btn {
+	background-color: #555555;
+	top: 0;
+	right: 0;
+}
