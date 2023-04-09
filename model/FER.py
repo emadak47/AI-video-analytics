@@ -2,7 +2,7 @@ import cv2
 
 from typing import Optional
 from settings import CONSTANTS, PATHS
-from utils.utils import save_model, load_model
+from utils import save_model, load_model
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Dropout, Flatten

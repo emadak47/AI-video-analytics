@@ -12,7 +12,7 @@ from tensorflow.keras.models import Sequential, Model
 from tensorflow.keras.utils import to_categorical 
 
 from typing import Optional, Tuple, List, Any
-from utils.utils import save_model, load_model
+from utils import save_model, load_model
 from settings import PATHS, CONSTANTS
 from sklearn.preprocessing import LabelEncoder
 

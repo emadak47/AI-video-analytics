@@ -10,7 +10,7 @@ from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.optimizers import RMSprop 
         
 from typing import List, Optional
-from utils.utils import Choice, generate_combinations, save_model, load_model
+from utils import Choice, generate_combinations, save_model, load_model
 from settings import PATHS, CONSTANTS
 from sklearn.utils import shuffle
 from sklearn.preprocessing import LabelEncoder
