@@ -2,18 +2,16 @@ import pyaudio
 import wave
 import os
 
-from settings import PATHS
-
 def audio_recorder(audio_files_counter: int):
-    if not os.path.isdir(PATHS.AUDIO_OUTPUT):
-        os.mkdir(PATHS.AUDIO_OUTPUT)
+    if not os.path.isdir("audio/"):
+        os.mkdir("audio/")
 
     CHUNK = 1024 
     FORMAT = pyaudio.paInt16
     CHANNELS = 1
     RATE = 44100
     RECORD_SECONDS = 3
-    WAVE_OUTPUT_FILENAME = os.path.join(PATHS.AUDIO_OUTPUT, f"{audio_files_counter}.wav")
+    WAVE_OUTPUT_FILENAME = os.path.join("audio/", f"{audio_files_counter}.wav")
 
     p = pyaudio.PyAudio()
 
