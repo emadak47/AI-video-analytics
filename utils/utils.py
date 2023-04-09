@@ -1,38 +1,10 @@
-import os
+import os, shutil
 import cv2
 import random 
 import itertools
-import subprocess
-import mutagen
+
 from settings import PATHS
-from typing import Optional, List, Dict, Any
-from pydub import AudioSegment
-from mutagen.wave import WAVE
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.models import model_from_json
-
-
-def save_model(model: Sequential, model_name: str) -> None: 
-    model_json = model.to_json()
-    with open(f"saved_model/{model_name}.json", "w") as json_file:
-        json_file.write(model_json)
-
-    model.save_weights(f"saved_model/{model_name}.h5")
-
-
-def load_model(model_name: str = 'default') -> Optional[Sequential]:
-    emotion_model = None
-    if (
-        os.path.exists(f'saved_model/{model_name}.json') and 
-        os.path.exists(f'saved_model/{model_name}.h5')
-    ):
-        json_file = open(f'saved_model/{model_name}.json', 'r')
-        loaded_model_json = json_file.read()
-        json_file.close()
-        emotion_model = model_from_json(loaded_model_json)
-        emotion_model.load_weights(f"saved_model/{model_name}.h5")
-
-    return emotion_model
+from typing import List, Dict, Any
 
 
 class Choice:
@@ -50,7 +22,24 @@ def generate_combinations(data: Dict[str, Choice]) -> List:
     return list(itertools.product(*categories))
 
 
+def prep_folder(path_to_saving_directory: str): 
+    if not os.path.isdir(path_to_saving_directory):
+        os.mkdir(path_to_saving_directory)
+    else: 
+        for filename in os.listdir(path_to_saving_directory):
+            file_path = os.path.join(path_to_saving_directory, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
+
+
 def save_face_frames(path_to_video_source: str, path_to_saving_directory: str):
+    prep_folder(path_to_saving_directory)
+
     cap = cv2.VideoCapture(path_to_video_source)
     success, frame = cap.read()
     count = 0
@@ -73,48 +62,15 @@ def save_face_frames(path_to_video_source: str, path_to_saving_directory: str):
         count += 1
 
 
-def convert_video_to_audio(path_to_video_source: str, output_ext: str = "wav") -> None:
-    filename, _ = os.path.splitext(path_to_video_source)
-    subprocess.call(
-        ["ffmpeg", "-y", "-i", path_to_video_source, f"{filename}.{output_ext}"], 
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.STDOUT)
-
-
-def get_audio_length(path_to_audio_source: str) -> int: 
-    audio = WAVE(path_to_audio_source)
-    audio_info = audio.info
-    return int(round(audio_info.length))
-
-
-class SplitWavAudio():
-    def __init__(self, folder, filename):
-        self.folder = folder
-        self.filename = filename
-        
-        self.audio = AudioSegment.from_wav(self.filename)
-    
-    def get_duration(self):
-        return self.audio.duration_seconds
-    
-    def single_split(self, from_, to_, split_filename):
-        t1 = from_ * 1000
-        t2 = to_ * 1000
-        split_audio = self.audio[t1:t2]
-        split_audio.export(self.folder + '/' + split_filename, format="wav")
-        
-    def multiple_split(self, sec_per_split):
-        total = round(self.get_duration())
-        for i in range(0, total, sec_per_split):
-            split_fn = str(i) + '_' + self.filename
-            self.single_split(i, i+sec_per_split, split_fn)
-
-
-def prettify_print(item: Any, msg: str): 
+def prettify_print(item: Any, msg: str = ""): 
     print("\n====================================================================================================")
     print("====================================================================================================\n")
-    print(f"*********************************************** {msg} **********************************************\n")
+    print(f"****************************************** {msg} ****************************************\n")
     print(item)
-
     print("\n====================================================================================================")
     print("====================================================================================================\n")
+
+
+def is_file_allowed(filename: str) -> bool:
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'wav'}

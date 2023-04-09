@@ -35,10 +35,6 @@ class PATHS:
     RAVDESS = RAVDESS_PATH
     EYE_REACTION = EYE_REACTION_PATH
     HAARCASCADES = HAARCASCADES_PATH
-    FRAMES: str = "frames/"
-    AUDIO_OUTPUT: str = "audio/"
-    VIDEO_RECORDING: str = "trial.mp4"
-    AUDIO_RECORDING: str = "audio_recordings/"
 
 
 class CONSTANTS:
