@@ -52,7 +52,7 @@ class Eye_Emotion_Model:
                     image = cv2.imread(os.path.join(_p, image), cv2.IMREAD_GRAYSCALE)
                 else:
                     image = cv2.imread(os.path.join(_p, image))
-                image = cv2.resize(image,self.size_images)
+                image = cv2.resize(image,self._img_size)
                 images.append(image)
                 labels.append(emotion)
 
@@ -65,12 +65,8 @@ class Eye_Emotion_Model:
             return images, labels
     
     def _load_data(self) -> Tuple[List, List, List, List]:
-        for file in os.listdir(PATHS.EYE_REACTION):
-            if file == "train":
-                train_x, train_y = self._load_images(PATHS.EYE_REACTION.TRAIN)
-            
-            elif file == "test":
-                test_x, test_y = self._load_images(PATHS.EYE_REACTION.TEST)
+        train_x, train_y = self._load_images(PATHS.EYE_REACTION.TRAIN)
+        test_x, test_y = self._load_images(PATHS.EYE_REACTION.TEST)
             
         return train_x, train_y, test_x, test_y
     
@@ -125,7 +121,7 @@ class Eye_Emotion_Model:
         features = self.get_features(train_x)
 
         if self._default:
-            emotion_model = self._build_default_model()
+            emotion_model = self._build_default_model(features)
         else:
             emotion_model = self._initiate_custom_model(self._custom_model_name)
 
