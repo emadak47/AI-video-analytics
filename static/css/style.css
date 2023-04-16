@@ -17,12 +17,13 @@ body {
 }
 
 .video-container {
-	width: 65%;
+	width: 70%;
 	height: 64%;
 	background-color: #eee;
 	border: 1px solid #ccc;
 	padding: 10px;
 	position: relative;
+	overflow: hidden;
 }
 
 .grid-container {
@@ -39,22 +40,40 @@ body {
 
 .sidebar {
 	background-color: #fff;
+	border: 1px solid #ccc;
 	padding: 10px;
 	display: flex;
 	flex-direction: column;
+	height: 64%;
+	width: 30%;
 }
 
 .btmbar {
 	background-color: #fff;
+	border: 1px solid #ccc;
+	padding: 10px;
 	display: flex;
 	flex-direction: row;
+	height: 35%;
+	width: 100%;
 }
 
 .pie-chart {
-	margin-bottom: 10px;
-	height: 460px;
-	width: 460px;
+	margin-bottom: 12px;
+	height: 100%;
+	width: 100%;
 	background-color: #f0f0f0;
+}
+
+.btmbar > .pie-chart {
+	width: 33.333%;
+}
+
+.button-div {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	float: right;
 }
 
 button {
@@ -64,12 +83,12 @@ button {
 	padding: 5px 10px;
 	text-align: center;
 	text-decoration: none;
-	display: inline-block;
+	display: block;
 	font-size: 16px;
 	margin: 6px 6px;
 	cursor: pointer;
 	border-radius: 5px;
-	position: absolute;
+	position: sticky;
 }
 
 #upload-btn:before {
