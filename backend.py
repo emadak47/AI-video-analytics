@@ -43,8 +43,10 @@ def st_data():
 
 @app.route('/rt-data')
 def rt_data():
-    (attentivness_pc, deep_thinking_pc, confidence_pc, potential_lie_pc) = \
-        rt_analysis.run()
+    attentivness_pc, deep_thinking_pc, confidence_pc, potential_lie_pc = None, None, None, None
+    stats = rt_analysis.run()        
+    if stats:
+        (attentivness_pc, deep_thinking_pc, confidence_pc, potential_lie_pc) = stats
 
     FER_mp = rt_analysis._get_FER_pc()
     EYE_EMOTION_mp = rt_analysis._get_eye_emotion_pc()

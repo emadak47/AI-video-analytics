@@ -10,7 +10,7 @@ from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.optimizers import RMSprop 
         
 from typing import List, Optional
-from utils import Choice, generate_combinations, save_model, load_model
+from utils import * 
 from settings import PATHS, CONSTANTS
 from sklearn.utils import shuffle
 from sklearn.preprocessing import LabelEncoder
@@ -45,10 +45,13 @@ class Audio_Model:
 
     def _get_audio_files(self) -> List:
         audio_files = []
-        for folder in listdir(PATHS.RAVDESS.TRAIN):
-            for f in listdir(join(PATHS.RAVDESS.TRAIN, folder)):
-                if isfile(join(PATHS.RAVDESS.TRAIN, folder, f)):
-                    audio_files.append(f)
+        try:
+            for folder in listdir(PATHS.RAVDESS.TRAIN):
+                for f in listdir(join(PATHS.RAVDESS.TRAIN, folder)):
+                    if isfile(join(PATHS.RAVDESS.TRAIN, folder, f)):
+                        audio_files.append(f)
+        except Exception as e: 
+            prettify_print(f"Error: {e}", "load eye emotion data error")
 
         return audio_files
     
