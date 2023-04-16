@@ -13,16 +13,18 @@
 	<div class="container">
 		<div class="video-container">
 			<div class="grid-container"></div>
-			<button id="upload-btn" onclick="uploadVideo()"></button>
-			<button id="live-btn" onclick="liveVideo()"></button>
-			<button id="terminate-btn" onclick="terminate()"></button>
+			<div class="button-div">
+				<button id="upload-btn" onclick="uploadVideo()"></button>
+				<button id="live-btn" onclick="liveVideo()"></button>
+				<button id="terminate-btn" onclick="terminate()"></button>
+			</div>	
 		</div>
 		<div class="sidebar">
 			<canvas class="pie-chart" id="FACIAL-EXPRESSION"></canvas>
-			<canvas class="pie-chart" id="EYE-EMOTION"></canvas>
+			<canvas class="pie-chart" id="EYE-GAZE"></canvas>
 		</div>
 		<div class="btmbar">
-			<canvas class="pie-chart" id="EYE-GAZE"></canvas>
+			<canvas class="pie-chart" id="EYE-EMOTION"></canvas>
 			<canvas class="pie-chart" id="AUDIO"></canvas>
 			<canvas class="pie-chart" id="METRICS"></canvas>
 		</div>
@@ -53,19 +55,35 @@
 		}
 
 		function drawPieChart(itemId, result) {
+			isResultEmpty = true;
+
+			for (const prop in result) {
+				if (result[prop] != 0) {
+					isResultEmpty = false;
+					break;
+				}
+			}
+
 			var charData = {
 				labels: [],
 				datasets: [{ data: [], backgroundColor: [], borderWidth: 1 }]
 			};
-			let counter = 0;
 
-			for (const prop in result) {
-				if (prop == "count" || prop == "c_o_u_n_t") { continue; }
+			if (!isResultEmpty) {
+				let counter = 0;
 
-				charData.labels.push(prop);
-				charData.datasets[0].data.push(result[prop]);
-				charData.datasets[0].backgroundColor.push(backgroundColor[counter]);
-				counter += 1;
+				for (const prop in result) {
+					if (prop == "count" || prop == "c_o_u_n_t") { continue; }
+
+					charData.labels.push(prop);
+					charData.datasets[0].data.push(result[prop]);
+					charData.datasets[0].backgroundColor.push(backgroundColor[counter]);
+					counter += 1;
+				}
+			} else {
+				charData.labels.push("No Data");
+				charData.datasets[0].data.push(1);
+				charData.datasets[0].backgroundColor.push(backgroundColor[0]);
 			}
 
 			var ctx = document.getElementById(itemId).getContext("2d");
@@ -106,6 +124,15 @@
 		}
 
 		function drawBarChart(itemId, scores) {
+			isResultEmpty = true;
+
+			for (const prop in scores) {
+				if (scores[prop] != 0) {
+					isResultEmpty = false;
+					break;
+				}
+			}
+
 			var charData = {
 				labels: [],
 				datasets: [{
@@ -116,15 +143,23 @@
 					borderWidth: 1,
 				}]
 			};
-			let counter = 0;
 
-			for (const prop in scores) {
-				charData.labels.push(prop);
-				charData.datasets[0].data.push(scores[prop]);
-				charData.datasets[0].backgroundColor.push(backgroundColor[counter]);
-				charData.datasets[0].borderColor.push(backgroundColor[counter]);
+			if (!isResultEmpty) {
+				let counter = 0;
 
-				counter += 1;
+				for (const prop in scores) {
+					charData.labels.push(prop);
+					charData.datasets[0].data.push(scores[prop]);
+					charData.datasets[0].backgroundColor.push(backgroundColor[counter]);
+					charData.datasets[0].borderColor.push(backgroundColor[counter]);
+
+					counter += 1;
+				}
+			} else { 
+				charData.labels.push("No Data");
+				charData.datasets[0].data.push(1);
+				charData.datasets[0].backgroundColor.push(backgroundColor[0]);
+				charData.datasets[0].borderColor.push(backgroundColor[0]);
 			}
 
 			var ctx = document.getElementById(itemId).getContext("2d");
@@ -200,15 +235,19 @@
 			videoStream.src = "{{ url_for('video_feed') }}";
 			document.getElementsByClassName("video-container")[0].appendChild(videoStream);
 
-			let result = await getData("rt-data");
+			async function showData() {
+				let result = await getData("rt-data");
 
-			console.log(result);
-			
-			drawPieChart("FACIAL-EXPRESSION", result.FER);
-			drawPieChart("EYE-EMOTION", result.EYE_EMOTION);
-			drawPieChart("EYE-GAZE", result.EYE_GAZE);
-			drawPieChart("AUDIO", result.AUDIO);
-			drawBarChart("METRICS", result.Scores);
+				drawPieChart("FACIAL-EXPRESSION", result.FER);
+				drawPieChart("EYE-EMOTION", result.EYE_EMOTION);
+				drawPieChart("EYE-GAZE", result.EYE_GAZE);
+				drawPieChart("AUDIO", result.AUDIO);
+				drawBarChart("METRICS", result.Scores);
+
+				setTimeout(showData, 1000);
+			}
+
+			showData();
 		}
 
 		async function terminate() {
@@ -221,9 +260,10 @@
 			}
 		}
 
-		const gridContainer = document.getElementsByClassName('grid-container')[0];
+
 		const uploadButton = document.getElementById('upload-btn');
 		uploadButton.addEventListener('click', async () => {
+			const gridContainer = document.getElementsByClassName('grid-container')[0];
 			const numCells = 15;
 
 			var mp = {
